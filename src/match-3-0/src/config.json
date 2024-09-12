@@ -1,0 +1,16 @@
+{
+	"fonts": [
+		{
+			"name": "Joystix",
+			"path": "./assets/fonts/Joystix.ttf"
+		}
+	],
+	"images": [
+		{
+			"name": "sprite-sheet",
+			"path": "./assets/images/sprite_sheet.png",
+			"width": 384,
+			"height": 288
+		}
+	]
+}
