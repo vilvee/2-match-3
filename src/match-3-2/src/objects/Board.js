@@ -86,14 +86,12 @@ export default class Board {
 		// Swap canvas positions by tweening so the swap is animated.
 		timer.tweenAsync(
 			highlightedTile,
-			['x', 'y'],
-			[temporaryTile.x, temporaryTile.y],
+			{ 'x': temporaryTile.x, 'y': temporaryTile.y },
 			0.2
 		);
 		await timer.tweenAsync(
 			selectedTile,
-			['x', 'y'],
-			[highlightedTile.x, highlightedTile.y],
+			{ 'x': highlightedTile.x, 'y':highlightedTile.y },
 			0.2
 		);
 

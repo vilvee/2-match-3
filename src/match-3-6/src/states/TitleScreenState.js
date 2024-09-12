@@ -121,7 +121,7 @@ export default class TitleScreenState extends State {
 			 * Tween (using the Timer) the transition rectangle's alpha to 1, then
 			 * transition to the LevelTransitionState after the animation is over.
 			 */
-			await timer.tweenAsync(this, ['transitionAlpha'], [1], 1);
+			await timer.tweenAsync(this, { 'transitionAlpha': 1 }, 1);
 
 			stateMachine.change(StateName.LevelTransition, {
 				level: 1,

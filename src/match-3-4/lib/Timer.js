@@ -1,3 +1,5 @@
+import Easing from './Easing.js';
+
 /**
  * Uses delta time passed in from our game loop to keep track of individual
  * tasks over a given period of time. You can specify an action to be done at
@@ -55,30 +57,39 @@ export default class Timer {
 	 * Interpolate a value until a specified value is reached over a specified period of time in seconds.
 	 *
 	 * @param {object} object An object that has at least one numerical property to interpolate.
-	 * @param {array} parameters The properties of the object to interpolate (as strings).
-	 * @param {array} endValues The final numerical values the parameters should reach.
+	 * @param {array} parameters The properties of the object to interpolate (as strings) and the final numerical values the parameters should reach.
 	 * @param {number} duration How long the interpolation should take.
 	 * @param {function} callback The function to execute after duration has passed.
 	 */
-	tween(object, parameters, endValues, duration, callback = () => {}) {
+	tween(
+		object,
+		parameters,
+		duration,
+		easing = Easing.linear,
+		callback = () => {}
+	) {
 		const startingValues = JSON.parse(JSON.stringify(object)); // Remove extra parameters (ex. prototype).
+		const keys = Object.keys(parameters);
 
 		this.addTask(
 			(time) => {
-				parameters.forEach((parameter, index) => {
+				keys.forEach((key) => {
 					// Calculate the direction in case we have to tween values from high to low.
 					const direction =
-						endValues[index] - object[parameter] > 0 ? 1 : -1;
-					const startValue = startingValues[parameter];
-					const endValue = endValues[index];
-					const scaleRatio = time / duration;
-					const currentValue =
-						startValue + (endValue - startValue) * scaleRatio;
+						parameters[key] - object[key] > 0 ? 1 : -1;
+					const startValue = startingValues[key];
+					const endValue = parameters[key];
+					const currentValue = easing(
+						time,
+						startValue,
+						endValue - startValue,
+						duration
+					);
 
 					if (direction === 1) {
-						object[parameter] = Math.min(endValue, currentValue);
+						object[key] = Math.min(endValue, currentValue);
 					} else {
-						object[parameter] = Math.max(endValue, currentValue);
+						object[key] = Math.max(endValue, currentValue);
 					}
 				});
 			},
@@ -88,9 +99,9 @@ export default class Timer {
 		);
 	}
 
-	async tweenAsync(object, parameters, endValues, duration) {
+	async tweenAsync(object, parameters, duration, easing = Easing.linear) {
 		return new Promise((resolve) => {
-			this.tween(object, parameters, endValues, duration, resolve);
+			this.tween(object, parameters, duration, easing, resolve);
 		});
 	}
 

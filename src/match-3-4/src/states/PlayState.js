@@ -125,7 +125,7 @@ export default class PlayState extends State {
 		// Tween all the falling blocks simultaneously.
 		await Promise.all(
 			tilesToFall.map((tile) => {
-				timer.tweenAsync(tile.tile, tile.parameters, tile.endValues, 2);
+				timer.tweenAsync(tile.tile, tile.endValues, 2);
 			})
 		);
 
@@ -136,7 +136,6 @@ export default class PlayState extends State {
 		for (const tile of newTiles) {
 			await timer.tweenAsync(
 				tile.tile,
-				tile.parameters,
 				tile.endValues,
 				1
 			);

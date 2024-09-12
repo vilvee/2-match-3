@@ -252,7 +252,6 @@ export default class PlayState extends State {
 			tilesToFall.map((tile) => {
 				timer.tweenAsync(
 					tile.tile,
-					tile.parameters,
 					tile.endValues,
 					0.25
 				);
@@ -266,7 +265,6 @@ export default class PlayState extends State {
 		for (const tile of newTiles) {
 			await timer.tweenAsync(
 				tile.tile,
-				tile.parameters,
 				tile.endValues,
 				0.1
 			);
