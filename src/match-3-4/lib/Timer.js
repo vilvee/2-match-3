@@ -141,7 +141,7 @@ class Task {
 		}
 		// Otherwise, at every interval, execute the action.
 		else if (this.intervalTimer >= this.interval) {
-			this.action(dt);
+			this.action();
 			this.intervalTimer = 0;
 		}
 
