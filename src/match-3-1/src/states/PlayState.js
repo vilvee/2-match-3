@@ -1,9 +1,10 @@
 import Board from '../objects/Board.js';
 import { roundedRectangle } from '../../lib/Drawing.js';
-import { context, keys } from '../globals.js';
+import { context, input } from '../globals.js';
 import State from '../../lib/State.js';
 import Tile from '../objects/Tile.js';
 import Cursor from '../objects/Cursor.js';
+import Input from '../../lib/Input.js';
 
 export default class PlayState extends State {
 	constructor() {
@@ -25,9 +26,7 @@ export default class PlayState extends State {
 		this.cursor.update(dt);
 
 		// If we've pressed enter, select or deselect the currently highlighted tile.
-		if (keys.Enter) {
-			keys.Enter = false;
-
+		if (input.isKeyPressed(Input.KEYS.ENTER) && !this.board.isSwapping) {
 			this.selectTile();
 		}
 	}

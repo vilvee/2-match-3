@@ -1,9 +1,10 @@
 import Board from '../objects/Board.js';
 import { roundedRectangle } from '../../lib/Drawing.js';
 import { SoundName, StateName } from '../enums.js';
-import { context, keys, sounds, stateMachine, timer } from '../globals.js';
+import { context, input, sounds, stateMachine, timer } from '../globals.js';
 import State from '../../lib/State.js';
 import Tile from '../objects/Tile.js';
+import Input from '../../lib/Input.js';
 
 export default class PlayState extends State {
 	constructor() {
@@ -62,9 +63,7 @@ export default class PlayState extends State {
 		this.updateCursor();
 
 		// If we've pressed enter, select or deselect the currently highlighted tile.
-		if (keys.Enter) {
-			keys.Enter = false;
-
+		if (input.isKeyPressed(Input.KEYS.ENTER) && !this.board.isSwapping) {
 			this.selectTile();
 		}
 
@@ -86,20 +85,16 @@ export default class PlayState extends State {
 		let x = this.cursor.boardX;
 		let y = this.cursor.boardY;
 
-		if (keys.w) {
-			keys.w = false;
+		if (input.isKeyPressed(Input.KEYS.W)) {
 			y = Math.max(0, this.cursor.boardY - 1);
 			sounds.play(SoundName.Select);
-		} else if (keys.s) {
-			keys.s = false;
+		} else if (input.isKeyPressed(Input.KEYS.S)) {
 			y = Math.min(Board.SIZE - 1, this.cursor.boardY + 1);
 			sounds.play(SoundName.Select);
-		} else if (keys.a) {
-			keys.a = false;
+		} else if (input.isKeyPressed(Input.KEYS.A)) {
 			x = Math.max(0, this.cursor.boardX - 1);
 			sounds.play(SoundName.Select);
-		} else if (keys.d) {
-			keys.d = false;
+		} else if (input.isKeyPressed(Input.KEYS.D)) {
 			x = Math.min(Board.SIZE - 1, this.cursor.boardX + 1);
 			sounds.play(SoundName.Select);
 		}
@@ -170,11 +165,7 @@ export default class PlayState extends State {
 		// Tween all the falling blocks simultaneously.
 		await Promise.all(
 			tilesToFall.map((tile) => {
-				timer.tweenAsync(
-					tile.tile,
-					tile.endValues,
-					0.25
-				);
+				timer.tweenAsync(tile.tile, tile.endValues, 0.25);
 			})
 		);
 
@@ -183,11 +174,7 @@ export default class PlayState extends State {
 
 		// Tween the new tiles falling one by one for a more interesting animation.
 		for (const tile of newTiles) {
-			await timer.tweenAsync(
-				tile.tile,
-				tile.endValues,
-				0.1
-			);
+			await timer.tweenAsync(tile.tile, tile.endValues, 0.1);
 		}
 	}
 
@@ -251,17 +238,13 @@ export default class PlayState extends State {
 
 	startTimer() {
 		// Decrement the timer every second.
-		timer.addTask(
-			() => {
-				this.timer--;
+		timer.addTask(() => {
+			this.timer--;
 
-				if (this.timer <= 5) {
-					sounds.play(SoundName.Clock);
-				}
-			},
-			1,
-			this.maxTimer
-		);
+			if (this.timer <= 5) {
+				sounds.play(SoundName.Clock);
+			}
+		}, 1);
 	}
 
 	checkVictory() {

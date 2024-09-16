@@ -4,6 +4,7 @@ import {
 	context,
 	sounds,
 	timer,
+	images,
 } from '../globals.js';
 import Tile from './Tile.js';
 import { SoundName, TileColour, TilePattern } from '../enums.js';
@@ -33,7 +34,7 @@ export default class Board {
 		this.matches = [];
 		this.tiles = [];
 		this.minimumMatchLength = 3;
-		this.tileSprites = Tile.generateSprites();
+		this.tileSprites = Tile.generateSprites(images);
 
 		this.initializeBoard();
 	}
@@ -134,17 +135,21 @@ export default class Board {
 
 		sounds.play(SoundName.Whip);
 
+		this.isSwapping = true;
+
 		// Swap canvas positions by tweening so the swap is animated.
 		timer.tweenAsync(
 			highlightedTile,
-			{ 'x': temporaryTile.x, 'y': temporaryTile.y },
+			{ x: temporaryTile.x, y: temporaryTile.y },
 			0.2
 		);
 		await timer.tweenAsync(
 			selectedTile,
-			{ 'x': highlightedTile.x, 'y':highlightedTile.y },
+			{ x: highlightedTile.x, y: highlightedTile.y },
 			0.2
 		);
+
+		this.isSwapping = false;
 
 		// Swap board positions.
 		selectedTile.boardX = highlightedTile.boardX;

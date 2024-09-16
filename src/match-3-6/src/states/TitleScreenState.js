@@ -4,7 +4,7 @@ import {
 	CANVAS_HEIGHT,
 	CANVAS_WIDTH,
 	context,
-	keys,
+	input,
 	sounds,
 	stateMachine,
 	timer,
@@ -12,6 +12,7 @@ import {
 import Scene from '../objects/Scene.js';
 import State from '../../lib/State.js';
 import { roundedRectangle } from '../../lib/Drawing.js';
+import Input from '../../lib/Input.js';
 
 /**
  * Represents the state the game is in when we've just started.
@@ -90,17 +91,16 @@ export default class TitleScreenState extends State {
 			return;
 		}
 
-		if (keys.w || keys.s) {
-			keys.w = keys.s = false;
-
+		if (
+			input.isKeyPressed(Input.KEYS.W) ||
+			input.isKeyPressed(Input.KEYS.S)
+		) {
 			this.currentMenuOption = this.currentMenuOption === 0 ? 1 : 0;
 			sounds.play(SoundName.Select);
 		}
 
 		// switch to another state via one of the menu options
-		if (keys.Enter) {
-			keys.Enter = false;
-
+		if (input.isKeyPressed(Input.KEYS.ENTER)) {
 			this.startTransition();
 		}
 	}
@@ -121,7 +121,7 @@ export default class TitleScreenState extends State {
 			 * Tween (using the Timer) the transition rectangle's alpha to 1, then
 			 * transition to the LevelTransitionState after the animation is over.
 			 */
-			await timer.tweenAsync(this, { 'transitionAlpha': 1 }, 1);
+			await timer.tweenAsync(this, { transitionAlpha: 1 }, 1);
 
 			stateMachine.change(StateName.LevelTransition, {
 				level: 1,

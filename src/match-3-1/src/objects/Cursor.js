@@ -1,8 +1,9 @@
 import { roundedRectangle } from '../../lib/Drawing.js';
 import { SoundName } from '../enums.js';
-import { context, keys, sounds } from '../globals.js';
+import { context, input, sounds } from '../globals.js';
 import Board from './Board.js';
 import Tile from './Tile.js';
+import Input from '../../lib/Input.js';
 
 export default class Cursor {
 	/**
@@ -47,20 +48,16 @@ export default class Cursor {
 	}
 
 	moveCursor() {
-		if (keys.w) {
-			keys.w = false;
+		if (input.isKeyPressed(Input.KEYS.W)) {
 			this.boardY = Math.max(0, this.boardY - 1);
 			sounds.play(SoundName.Select);
-		} else if (keys.s) {
-			keys.s = false;
+		} else if (input.isKeyPressed(Input.KEYS.S)) {
 			this.boardY = Math.min(Board.SIZE - 1, this.boardY + 1);
 			sounds.play(SoundName.Select);
-		} else if (keys.a) {
-			keys.a = false;
+		} else if (input.isKeyPressed(Input.KEYS.A)) {
 			this.boardX = Math.max(0, this.boardX - 1);
 			sounds.play(SoundName.Select);
-		} else if (keys.d) {
-			keys.d = false;
+		} else if (input.isKeyPressed(Input.KEYS.D)) {
 			this.boardX = Math.min(Board.SIZE - 1, this.boardX + 1);
 			sounds.play(SoundName.Select);
 		}

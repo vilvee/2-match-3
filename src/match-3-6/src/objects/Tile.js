@@ -1,6 +1,6 @@
-import { context, images } from "../globals.js";
-import { ImageName, TileColour, TilePattern } from "../enums.js";
-import Sprite from "../../lib/Sprite.js";
+import { context } from '../globals.js';
+import { ImageName, TileColour, TilePattern } from '../enums.js';
+import Sprite from '../../lib/Sprite.js';
 
 export default class Tile {
 	static SIZE = 32;
@@ -15,7 +15,13 @@ export default class Tile {
 	 * @param {Number} pattern
 	 * @param {Array} sprites
 	 */
-	constructor(x, y, colour = TileColour.Beige, pattern = TilePattern.Flat, sprites = []) {
+	constructor(
+		x,
+		y,
+		colour = TileColour.Beige,
+		pattern = TilePattern.Flat,
+		sprites = []
+	) {
 		// Board position.
 		this.boardX = x;
 		this.boardY = y;
@@ -35,7 +41,7 @@ export default class Tile {
 	 *
 	 * @returns An array of tile sprites.
 	 */
-	static generateSprites() {
+	static generateSprites(images) {
 		const ROWS = 9;
 		const COLUMNS = 6;
 		const SPLIT_POINT = 2;
@@ -50,7 +56,13 @@ export default class Tile {
 				sprites[counter] = [];
 
 				for (let column = 0; column < COLUMNS; column++) {
-					const sprite = new Sprite(images.get(ImageName.SpriteSheet), x, y, Tile.SIZE, Tile.SIZE);
+					const sprite = new Sprite(
+						images.get(ImageName.SpriteSheet),
+						x,
+						y,
+						Tile.SIZE,
+						Tile.SIZE
+					);
 
 					sprites[counter].push(sprite);
 					x += Tile.SIZE;
@@ -67,6 +79,10 @@ export default class Tile {
 	}
 
 	render(x, y) {
-		this.sprites[this.colour][this.pattern].render(context, this.x + x, this.y + y);
+		this.sprites[this.colour][this.pattern].render(
+			context,
+			this.x + x,
+			this.y + y
+		);
 	}
 }

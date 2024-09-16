@@ -26,43 +26,19 @@
  * @see http://cpetry.github.io/TextureGenerator-Online/
  */
 
-import { StateName } from "./enums.js";
-import Game from "../lib/Game.js";
-import GameOverState from "./states/GameOverState.js";
+import { StateName } from './enums.js';
+import Game from '../lib/Game.js';
+import GameOverState from './states/GameOverState.js';
 import {
 	canvas,
 	context,
-	fonts,
-	keys,
-	images,
-	sounds,
 	stateMachine,
 	CANVAS_WIDTH,
 	CANVAS_HEIGHT,
-} from "./globals.js";
-import LevelTransitionState from "./states/LevelTransitionState.js";
-import PlayState from "./states/PlayState.js";
-import TitleScreenState from "./states/TitleScreenState.js";
-
-// Set the dimensions of the play area.
-canvas.width = CANVAS_WIDTH;
-canvas.height = CANVAS_HEIGHT;
-canvas.setAttribute('tabindex', '1'); // Allows the canvas to receive user input.
-
-// Now that the canvas element has been prepared, we can add it to the DOM.
-document.body.appendChild(canvas);
-
-// Fetch the asset definitions from config.json.
-const {
-	sounds: soundDefinitions,
-	images: imageDefinitions,
-	fonts: fontDefinitions,
-} = await fetch('./src/config.json').then((response) => response.json());
-
-// Load all the assets from their definitions.
-sounds.load(soundDefinitions);
-images.load(imageDefinitions);
-fonts.load(fontDefinitions);
+} from './globals.js';
+import LevelTransitionState from './states/LevelTransitionState.js';
+import PlayState from './states/PlayState.js';
+import TitleScreenState from './states/TitleScreenState.js';
 
 // Add all the states to the state machine.
 stateMachine.add(StateName.GameOver, new GameOverState());
@@ -70,15 +46,7 @@ stateMachine.add(StateName.LevelTransition, new LevelTransitionState());
 stateMachine.add(StateName.Play, new PlayState());
 stateMachine.add(StateName.TitleScreen, new TitleScreenState());
 
-// Add event listeners for player input.
-canvas.addEventListener('keydown', event => {
-	keys[event.key] = true;
-});
-
-canvas.addEventListener('keyup', event => {
-	keys[event.key] = false;
-});
-
+// Start the game loop
 const game = new Game(stateMachine, context, CANVAS_WIDTH, CANVAS_HEIGHT);
 
 game.start();

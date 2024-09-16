@@ -1,10 +1,17 @@
-import { sounds, timer, CANVAS_WIDTH, CANVAS_HEIGHT } from '../globals.js';
+import {
+	CANVAS_HEIGHT,
+	CANVAS_WIDTH,
+	images,
+	sounds,
+	timer,
+} from '../globals.js';
 import Tile from './Tile.js';
 import { SoundName, TileColour, TilePattern } from '../enums.js';
 import {
 	getRandomPositiveInteger,
 	pickRandomElement,
 } from '../../lib/Random.js';
+import Easing from '../../lib/Easing.js';
 
 export default class Board {
 	static SIZE = 8;
@@ -32,7 +39,7 @@ export default class Board {
 		this.matches = [];
 		this.tiles = [];
 		this.minimumMatchLength = 3;
-		this.tileSprites = Tile.generateSprites();
+		this.tileSprites = Tile.generateSprites(images);
 	}
 
 	render() {
@@ -100,17 +107,23 @@ export default class Board {
 			selectedTile.boardY
 		);
 
+		this.isSwapping = true;
+
 		// Swap canvas positions by tweening so the swap is animated.
 		timer.tweenAsync(
 			highlightedTile,
-			{ 'x': temporaryTile.x, 'y': temporaryTile.y },
-			0.2
+			{ x: temporaryTile.x, y: temporaryTile.y },
+			0.2,
+			Easing.easeInQuad
 		);
 		await timer.tweenAsync(
 			selectedTile,
-			{ 'x': highlightedTile.x, 'y':highlightedTile.y },
-			0.2
+			{ x: highlightedTile.x, y: highlightedTile.y },
+			0.2,
+			Easing.easeInQuad
 		);
+
+		this.isSwapping = false;
 
 		// Swap board positions.
 		selectedTile.boardX = highlightedTile.boardX;
@@ -398,7 +411,9 @@ export default class Board {
 			const tile1 = this.tiles[tile1Position.x][tile1Position.y];
 			const tile2 = this.tiles[tile2Position.x][tile2Position.y];
 
-			await this.swapTiles(tile1, tile2);
+			if (!this.isSwapping) {
+				await this.swapTiles(tile1, tile2);
+			}
 		}, 0.3);
 	}
 }

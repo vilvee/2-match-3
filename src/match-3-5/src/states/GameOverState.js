@@ -3,11 +3,12 @@ import {
 	CANVAS_HEIGHT,
 	CANVAS_WIDTH,
 	context,
-	keys,
+	input,
 	stateMachine,
 } from '../globals.js';
 import State from '../../lib/State.js';
 import { roundedRectangle } from '../../lib/Drawing.js';
+import Input from '../../lib/Input.js';
 
 /**
  * Displays the game over screen along with the final score.
@@ -25,9 +26,7 @@ export default class GameOverState extends State {
 	}
 
 	update(dt) {
-		if (keys.Enter) {
-			keys.Enter = false;
-
+		if (input.isKeyPressed(Input.KEYS.ENTER)) {
 			stateMachine.change(StateName.Play, {
 				score: 0,
 				level: 1,

@@ -1,4 +1,4 @@
-import { CANVAS_HEIGHT, CANVAS_WIDTH } from '../globals.js';
+import { CANVAS_HEIGHT, CANVAS_WIDTH, images } from '../globals.js';
 import Tile from './Tile.js';
 import { TileColour, TilePattern } from '../enums.js';
 import {
@@ -23,7 +23,7 @@ export default class Board {
 	constructor(x, y) {
 		this.x = x;
 		this.y = y;
-		this.tileSprites = Tile.generateSprites();
+		this.tileSprites = Tile.generateSprites(images);
 		this.tiles = this.initializeBoard();
 	}
 

@@ -26,53 +26,21 @@
  * @see http://cpetry.github.io/TextureGenerator-Online/
  */
 
-import { StateName } from "./enums.js";
-import Game from "../lib/Game.js";
+import { StateName } from './enums.js';
+import Game from '../lib/Game.js';
 import {
 	canvas,
 	CANVAS_HEIGHT,
 	CANVAS_WIDTH,
 	context,
-	fonts,
-	images,
-	keys,
-	sounds,
 	stateMachine,
-} from "./globals.js";
-import PlayState from "./states/PlayState.js";
-
-// Set the dimensions of the play area.
-canvas.width = CANVAS_WIDTH;
-canvas.height = CANVAS_HEIGHT;
-canvas.setAttribute('tabindex', '1'); // Allows the canvas to receive user input.
-
-// Now that the canvas element has been prepared, we can add it to the DOM.
-document.body.appendChild(canvas);
-
-// Fetch the asset definitions from config.json.
-const {
-	sounds: soundDefinitions,
-	images: imageDefinitions,
-	fonts: fontDefinitions,
-} = await fetch('./src/config.json').then((response) => response.json());
-
-// Load all the assets from their definitions.
-sounds.load(soundDefinitions);
-images.load(imageDefinitions);
-fonts.load(fontDefinitions);
+} from './globals.js';
+import PlayState from './states/PlayState.js';
 
 // Add all the states to the state machine.
 stateMachine.add(StateName.Play, new PlayState());
 
-// Add event listeners for player input.
-canvas.addEventListener('keydown', event => {
-	keys[event.key] = true;
-});
-
-canvas.addEventListener('keyup', event => {
-	keys[event.key] = false;
-});
-
+// Start the game loop
 const game = new Game(stateMachine, context, CANVAS_WIDTH, CANVAS_HEIGHT);
 
 game.start();

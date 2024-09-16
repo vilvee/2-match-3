@@ -1,14 +1,15 @@
-import Board from "../objects/Board.js";
-import { SoundName, StateName } from "../enums.js";
+import Board from '../objects/Board.js';
+import { SoundName, StateName } from '../enums.js';
 import {
 	CANVAS_HEIGHT,
 	CANVAS_WIDTH,
 	context,
 	sounds,
 	stateMachine,
-	timer
-} from "../globals.js";
-import State from "../../lib/State.js";
+	timer,
+} from '../globals.js';
+import State from '../../lib/State.js';
+import Easing from '../../lib/Easing.js';
 
 /**
  * Represents the state the game is in right before we start playing.
@@ -52,18 +53,38 @@ export default class LevelTransitionState extends State {
 		 */
 
 		// First, over a period of 1 second, transition the alpha to 0.
-		await timer.tweenAsync(this, { 'transitionAlpha': 0 }, 1);
+		await timer.tweenAsync(this, { transitionAlpha: 0 }, 1);
 
 		// Once that's finished, start a transition of the text label to the center of the screen over 0.25 seconds.
-		timer.tweenAsync(this, { 'levelLabelY': CANVAS_HEIGHT / 2 - this.levelLabelHeight / 2 }, 0.5);
-		await timer.tweenAsync(this, { 'levelLableTextX': CANVAS_WIDTH / 2 + 5 }, 0.5);
+		timer.tweenAsync(
+			this,
+			{ levelLabelY: CANVAS_HEIGHT / 2 - this.levelLabelHeight / 2 },
+			0.5,
+			Easing.easeOutQuad
+		);
+		await timer.tweenAsync(
+			this,
+			{ levelLableTextX: CANVAS_WIDTH / 2 + 5 },
+			0.5,
+			Easing.easeOutQuad
+		);
 
 		// After that, pause for a beat to let the player read the text.
 		await timer.wait(1.25);
 
 		// Then, animate the label going down past the bottom edge.
-		timer.tweenAsync(this, { 'levelLabelY': CANVAS_HEIGHT + this.levelLabelHeight }, 0.5);
-		await timer.tweenAsync(this, { 'levelLableTextX': CANVAS_WIDTH }, 0.5);
+		timer.tweenAsync(
+			this,
+			{ levelLabelY: CANVAS_HEIGHT + this.levelLabelHeight },
+			0.5,
+			Easing.easeInQuad
+		);
+		await timer.tweenAsync(
+			this,
+			{ levelLableTextX: CANVAS_WIDTH },
+			0.5,
+			Easing.easeInQuad
+		);
 
 		// Once that's complete, we're ready to play!
 		stateMachine.change(StateName.Play, {
@@ -89,12 +110,21 @@ export default class LevelTransitionState extends State {
 	renderLevelLabel() {
 		context.save();
 		context.fillStyle = 'rgb(95, 205, 228, 0.8)';
-		context.fillRect(0, this.levelLabelY, CANVAS_WIDTH, this.levelLabelHeight);
+		context.fillRect(
+			0,
+			this.levelLabelY,
+			CANVAS_WIDTH,
+			this.levelLabelHeight
+		);
 		context.fillStyle = 'rgb(255, 255, 255, 1)';
 		context.font = '30px Joystix';
 		context.textBaseline = 'middle';
 		context.textAlign = 'center';
-		context.fillText(`Level ${this.level}`, this.levelLableTextX, this.levelLabelY + this.levelLabelHeight / 2 + 5);
+		context.fillText(
+			`Level ${this.level}`,
+			this.levelLableTextX,
+			this.levelLabelY + this.levelLabelHeight / 2 + 5
+		);
 	}
 
 	renderTransitionForeground() {
