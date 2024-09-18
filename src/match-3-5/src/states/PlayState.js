@@ -257,7 +257,7 @@ export default class PlayState extends State {
 		// Change to PlayState with incremented level.
 		stateMachine.change(StateName.Play, {
 			level: this.level + 1,
-			score: this.score,
+			score: this.scoreGoal,
 		});
 	}
 

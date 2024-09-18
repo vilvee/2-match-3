@@ -278,7 +278,7 @@ export default class PlayState extends State {
 
 		stateMachine.change(StateName.LevelTransition, {
 			level: this.level + 1,
-			score: this.score,
+			score: this.scoreGoal,
 			scene: this.scene,
 		});
 	}
