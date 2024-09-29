@@ -20,7 +20,8 @@ export default class Tile {
 		y,
 		colour = TileColour.Beige,
 		pattern = TilePattern.Flat,
-		sprites = []
+		sprites = [],
+		isStar = false
 	) {
 		// Board position.
 		this.boardX = x;
@@ -34,6 +35,7 @@ export default class Tile {
 		this.colour = colour;
 		this.pattern = pattern;
 		this.sprites = sprites;
+		this.isStar = isStar;
 	}
 
 	/**

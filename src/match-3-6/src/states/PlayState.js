@@ -30,6 +30,10 @@ export default class PlayState extends State {
 		// How much scoreGoal will be scaled by per level.
 		this.scoreGoalScale = 1.25;
 
+		this.hint = null;
+		this.hintCount = 0;
+		this.hintTiles =[];
+
 		/**
 		 * The timer will countdown and the player must try and
 		 * reach the scoreGoal before time runs out. The timer
@@ -37,6 +41,7 @@ export default class PlayState extends State {
 		 */
 		this.maxTimer = 60;
 		this.timer = this.maxTimer;
+		this.extraTimePerTile = 1;
 	}
 
 	enter(parameters) {
@@ -66,6 +71,12 @@ export default class PlayState extends State {
 			this.selectTile();
 		}
 
+		if (input.isKeyPressed(Input.KEYS.H) && !this.board.isSwapping) {
+			this.hint = true;
+			this.hintCount ++;
+			this.showHint();
+		}
+
 		timer.update(dt);
 	}
 
@@ -77,9 +88,55 @@ export default class PlayState extends State {
 			this.renderSelectedTile();
 		}
 
+		if (this.hint) {
+			this.renderHint(this.hintTiles[0], this.hintTiles[1]);
+		}
+
 		this.renderCursor();
 		this.renderUserInterface();
 	}
+
+	showHint() {
+		this.hintTiles = [];
+		// Call the board's showHint method
+		const hints = this.board.showHint();
+
+		for (const hint of hints) {
+			this.hintTiles.push(hint);
+			console.log(hint)
+		};
+	}
+
+
+	renderHint(tile1, tile2) {
+		context.save();
+		context.strokeStyle = 'yellow';
+		context.lineWidth = 4;
+
+		const x1 = tile1.boardX * Tile.SIZE + this.board.x;
+		const y1 = tile1.boardY * Tile.SIZE + this.board.y;
+		const x2 = tile2.boardX * Tile.SIZE + this.board.x;
+		const y2 = tile2.boardY * Tile.SIZE + this.board.y;
+
+		roundedRectangle(
+			context,
+			x1,
+			y1,
+			Tile.SIZE,
+			Tile.SIZE
+		);
+
+		roundedRectangle(
+			context,
+			x2,
+			y2,
+			Tile.SIZE,
+			Tile.SIZE
+		);
+		context.restore();
+	}
+
+
 
 	updateCursor() {
 		let x = this.cursor.boardX;
@@ -139,10 +196,57 @@ export default class PlayState extends State {
 	}
 
 	async swapTiles(highlightedTile) {
+		// Swap tiles
 		await this.board.swapTiles(this.selectedTile, highlightedTile);
+		const hasMatch =  await this.calculateMatches();
+
+		if (!hasMatch) {
+			// If no match, revert the swap
+			sounds.play(SoundName.Error); 
+			await this.flashInvalidSwap(this.selectedTile, highlightedTile);
+			await this.board.swapTiles(this.selectedTile, highlightedTile);
+		} else {
+			this.hint = false;
+		}
+
+		// Deselect the tile after the swap
 		this.selectedTile = null;
-		await this.calculateMatches();
 	}
+
+	async flashInvalidSwap(tile1, tile2) {
+		const flashColor = 'rgba(255, 0, 0, 0.5)';
+		for (let i = 0; i < 2; i++) {
+			this.highlightTile(tile1, flashColor);
+			this.highlightTile(tile2, flashColor);
+			await timer.wait(0.1);
+
+			// Reset the highlight
+			this.highlightTile(tile1, null);
+			this.highlightTile(tile2, null);
+			await timer.wait(0.1);
+		}
+	}
+
+	highlightTile(tile, color) {
+		if (color) {
+			context.save();
+			context.fillStyle = color;
+			roundedRectangle(
+				context,
+				tile.x + this.board.x,
+				tile.y + this.board.y,
+				Tile.SIZE,
+				Tile.SIZE,
+				10,
+				true,
+				false
+			);
+			context.restore();
+		} else {
+			tile.render(this.board.x, this.board.y);
+		}
+	}
+
 
 	renderSelectedTile() {
 		context.save();
@@ -183,7 +287,7 @@ export default class PlayState extends State {
 			50,
 			this.board.y,
 			225,
-			Board.SIZE * Tile.SIZE,
+			Board.SIZE * Tile.SIZE ,
 			5,
 			true,
 			false
@@ -192,15 +296,17 @@ export default class PlayState extends State {
 		context.fillStyle = 'white';
 		context.font = '25px Joystix';
 		context.textAlign = 'left';
-		context.fillText(`Level:`, 70, this.board.y + 45);
-		context.fillText(`Score:`, 70, this.board.y + 105);
-		context.fillText(`Goal:`, 70, this.board.y + 165);
-		context.fillText(`Timer:`, 70, this.board.y + 225);
+		context.fillText(`Level:`, 70, this.board.y + 35);
+		context.fillText(`Score:`, 70, this.board.y + 80);
+		context.fillText(`Goal:`, 70, this.board.y + 125);
+		context.fillText(`Timer:`, 70, this.board.y + 170);
+		context.fillText(`Hints:`, 70, this.board.y + 215);
 		context.textAlign = 'right';
-		context.fillText(`${this.level}`, 250, this.board.y + 45);
-		context.fillText(`${this.score}`, 250, this.board.y + 105);
-		context.fillText(`${this.scoreGoal}`, 250, this.board.y + 165);
-		context.fillText(`${this.timer}`, 250, this.board.y + 225);
+		context.fillText(`${this.level}`, 250, this.board.y + 35);
+		context.fillText(`${this.score}`, 250, this.board.y + 80);
+		context.fillText(`${this.scoreGoal}`, 250, this.board.y + 125);
+		context.fillText(`${this.timer}`, 250, this.board.y + 170);
+		context.fillText(`${this.hintCount}`, 250, this.board.y + 215);
 	}
 
 	/**
@@ -215,7 +321,7 @@ export default class PlayState extends State {
 
 		// If no matches, then no need to proceed with the function.
 		if (this.board.matches.length === 0) {
-			return;
+			return false;
 		}
 
 		this.calculateScore();
@@ -230,13 +336,27 @@ export default class PlayState extends State {
 		 * as a result of falling blocks once new blocks have finished falling.
 		 */
 		await this.calculateMatches();
+		return true;
 	}
 
 	calculateScore() {
 		this.board.matches.forEach((match) => {
-			this.score += match.length * this.baseScore;
+			let score = 0;
+			let tilesInMatch = match.length;
+
+			match.forEach((tile) => {
+				if (tile.isStar) {
+					score += 30;
+				} else {
+					score += this.baseScore;
+				}
+			});
+			this.score += score;
+			const timeReward = tilesInMatch * this.extraTimePerTile;
+			this.timer = Math.min(this.maxTimer, this.timer + timeReward);
 		});
 	}
+
 
 	async placeNewTiles() {
 		// Get an array with tween values for tiles that should now fall as a result of the removal.
@@ -273,7 +393,9 @@ export default class PlayState extends State {
 		if (this.score < this.scoreGoal) {
 			return;
 		}
-
+		
+		this.selectedTile = null;
+		this.hint = false;
 		sounds.play(SoundName.NextLevel);
 
 		stateMachine.change(StateName.LevelTransition, {

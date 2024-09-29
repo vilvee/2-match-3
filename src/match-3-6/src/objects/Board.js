@@ -83,6 +83,14 @@ export default class Board {
 	}
 
 	generateTile(x, y) {
+		const starProbability = 0.05;
+		let pattern = TilePattern.Flat;
+		let isStar = false;
+
+		if (Math.random() < starProbability) {
+			pattern = TilePattern.Star;
+			isStar = true;
+		}
 		const colourList = [
 			TileColour.Beige,
 			TileColour.Pink,
@@ -91,14 +99,16 @@ export default class Board {
 			TileColour.Blue,
 			TileColour.Orange,
 		];
-		const patternRange = [TilePattern.Flat, TilePattern.Flat];
+
 		const colour = pickRandomElement(colourList);
-		const pattern = getRandomPositiveInteger(
+		const patternRange = [pattern, pattern];
+		const randomPattern = getRandomPositiveInteger(
 			patternRange[0],
 			patternRange[1]
 		);
 
-		return new Tile(x, y, colour, pattern, this.tileSprites);
+
+		return  new Tile(x, y, colour, randomPattern, this.tileSprites, isStar);
 	}
 
 	async swapTiles(selectedTile, highlightedTile) {
@@ -146,6 +156,16 @@ export default class Board {
 		this.matches = [];
 		this.resolveHorizontalMatches();
 		this.resolveVerticalMatches();
+		console.log(this.matches.length);
+
+	}
+
+	isStar(row){
+		for(let i = 0; i < row.length; i++){
+			if(row[i].isStar){
+				return true;
+			}
+		}
 	}
 
 	resolveHorizontalMatches() {
@@ -173,8 +193,18 @@ export default class Board {
 							match.push(this.tiles[y][x2]);
 						}
 
-						// Add this match to our total matches array.
-						rowMatches.push(match);
+						if(this.isStar(match)){
+							let matchRow = [];
+							// Calculate score for entire row
+							for (let x3 = 0; x3 < Board.SIZE; x3++) {
+								matchRow.push(this.tiles[y][x3]);
+							}
+
+							rowMatches.push(matchRow);
+						} else{
+							// Add this match to our total matches array.
+							rowMatches.push(match);
+						}
 					}
 
 					matchCounter = 1;
@@ -199,8 +229,17 @@ export default class Board {
 					match.push(this.tiles[y][x]);
 				}
 
-				// Add this match to our total matches array.
-				rowMatches.push(match);
+				if(this.isStar(match)){
+					let matchRow = [];
+					// Calculate score for entire row
+					for (let x3 = 0; x3 < Board.SIZE; x3++) {
+						matchRow.push(this.tiles[y][x3]);
+					}
+
+					rowMatches.push(matchRow);
+				} else{
+					rowMatches.push(match);
+				}
 			}
 
 			// Insert matches into the board matches array.
@@ -233,8 +272,18 @@ export default class Board {
 							match.push(this.tiles[y2][x]);
 						}
 
-						// Add this match to our total matches array.
-						columnMatches.push(match);
+						if(this.isStar(match)){
+							let matchCol = [];
+							// Calculate score for entire row
+							for (let y3 = 0; y3 < Board.SIZE; y3++) {
+								matchCol.push(this.tiles[y3][x]);
+							}
+
+							columnMatches.push(matchCol);
+						} else{
+
+							columnMatches.push(match);
+						}
 					}
 
 					matchCounter = 1;
@@ -259,8 +308,18 @@ export default class Board {
 					match.push(this.tiles[y][x]);
 				}
 
-				// Add this match to our total matches array.
-				columnMatches.push(match);
+				if(this.isStar(match)){
+					let matchCol = [];
+					// Calculate score for entire row
+					for (let y3 = 0; y3 < Board.SIZE; y3++) {
+						matchCol.push(this.tiles[y3][x]);
+					}
+
+					columnMatches.push(matchCol);
+				} else{
+	
+					columnMatches.push(match);
+				}
 			}
 
 			// Insert matches into the board matches array.
@@ -416,4 +475,81 @@ export default class Board {
 			}
 		}, 0.3);
 	}
+
+	showHint() {
+		for (let row = 0; row < Board.SIZE; row++) {
+			for (let col = 0; col < Board.SIZE; col++) {
+				// Check horizontal swap
+				if (col < Board.SIZE - 2) {
+					if (this.checkSwapAndMatch(row, col, row, col + 1)) {
+						return [this.tiles[row][col], this.tiles[row][col + 1]];
+					}
+				}
+				// Check vertical swap
+				if (row < Board.SIZE - 2) {
+					if (this.checkSwapAndMatch(row, col, row + 1, col)) {
+						return [this.tiles[row][col], this.tiles[row + 1][col]];
+					}
+				}
+			}
+		}
+		return null;
+	}
+
+	checkSwapAndMatch(row1, col1, row2, col2) {
+
+		const temp = this.tiles[row1][col1];
+		this.tiles[row1][col1] = this.tiles[row2][col2];
+		this.tiles[row2][col2] = temp;
+
+		const foundMatch = this.isValidMatch(row1, col1) ||
+						   this.isValidMatch(row2, col2);
+
+		// Swap back the tiles
+		this.tiles[row2][col2] = this.tiles[row1][col1];
+		this.tiles[row1][col1] = temp;
+
+		return foundMatch;
+	}
+
+	isValidMatch(row, col) {
+		return this.isHorizontalMatch(row, col) || this.isVerticalMatch(row, col);
+	}
+
+	isHorizontalMatch(row, col) {
+		const color = this.tiles[row][col].colour;
+		let matchCount = 1;
+
+		// Check to the left
+		for (let c = col - 1; c >= 0 && this.tiles[row][c].colour === color; c--) {
+			matchCount++;
+		}
+
+		// Check to the right
+		for (let c = col + 1; c < Board.SIZE && this.tiles[row][c].colour === color; c++) {
+			matchCount++;
+		}
+
+		// Return true if there are 3 or more matching tiles horizontally
+		return matchCount >= 3;
+	}
+
+	isVerticalMatch(row, col) {
+		const color = this.tiles[row][col].colour;
+		let matchCount = 1;
+
+		// Check upwards
+		for (let r = row - 1; r >= 0 && this.tiles[r][col].colour === color; r--) {
+			matchCount++;
+		}
+
+		// Check downwards
+		for (let r = row + 1; r < Board.SIZE && this.tiles[r][col].colour === color; r++) {
+			matchCount++;
+		}
+
+		// Return true if there are 3 or more matching tiles vertically
+		return matchCount >= 3;
+	}
+
 }
