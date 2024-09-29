@@ -72,9 +72,12 @@ export default class PlayState extends State {
 		}
 
 		if (input.isKeyPressed(Input.KEYS.H) && !this.board.isSwapping) {
-			this.hint = true;
-			this.hintCount ++;
-			this.showHint();
+			if (this.hintCount<4) {
+				this.hint = true;
+				this.hintCount ++;
+				this.showHint();
+			}
+
 		}
 
 		timer.update(dt);
@@ -396,6 +399,7 @@ export default class PlayState extends State {
 		
 		this.selectedTile = null;
 		this.hint = false;
+		this.hintCount = 0;
 		sounds.play(SoundName.NextLevel);
 
 		stateMachine.change(StateName.LevelTransition, {
